@@ -425,7 +425,7 @@ Set to 2 to use heading from motion capture</short_desc>
     </parameter>
     <parameter default="56" name="TRIG_PINS" type="INT32">
       <short_desc>Camera trigger pin</short_desc>
-      <long_desc>Selects which pin is used, ranges from 1 to 6 (AUX1-AUX6 on px4fmu-v2 and the rail pins on px4fmu-v4). The PWM interface takes two pins per camera, while relay triggers on every pin individually. Example: Value 56 would trigger on pins 5 and 6.</long_desc>
+      <long_desc>Selects which pin is used, ranges from 1 to 6 (AUX1-AUX6 on px4fmu-v2 and the rail pins on px4fmu-v4). The PWM interface takes two pins per camera, while relay triggers on every pin individually. Example: Value 56 would trigger on pins 5 and 6. For GPIO mode Pin 6 will be triggered followed by 5. With a value of 65 pin 5 will be triggered followed by 6. Pins may be non contiguous. I.E. 16 or 61. In GPIO mode the delay pin to pin is &lt; .2 uS.</long_desc>
       <min>1</min>
       <max>123456</max>
       <decimal>0</decimal>
@@ -451,7 +451,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>162128</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="0" name="CBRK_BUZZER" type="INT32">
       <short_desc>Circuit breaker for disabling buzzer</short_desc>
@@ -459,7 +459,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>782097</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="284953" name="CBRK_ENGINEFAIL" type="INT32">
       <short_desc>Circuit breaker for engine failure detection</short_desc>
@@ -467,7 +467,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>284953</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="121212" name="CBRK_FLIGHTTERM" type="INT32">
       <short_desc>Circuit breaker for flight termination</short_desc>
@@ -475,7 +475,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>121212</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="0" name="CBRK_GPSFAIL" type="INT32">
       <short_desc>Circuit breaker for GPS failure detection</short_desc>
@@ -483,7 +483,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>240024</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="0" name="CBRK_IO_SAFETY" type="INT32">
       <short_desc>Circuit breaker for IO safety</short_desc>
@@ -491,7 +491,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>22027</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="0" name="CBRK_RATE_CTRL" type="INT32">
       <short_desc>Circuit breaker for rate controller output</short_desc>
@@ -499,7 +499,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>140253</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="0" name="CBRK_SUPPLY_CHK" type="INT32">
       <short_desc>Circuit breaker for power supply check</short_desc>
@@ -507,7 +507,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>894281</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="0" name="CBRK_USB_CHK" type="INT32">
       <short_desc>Circuit breaker for USB link check</short_desc>
@@ -515,7 +515,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>197848</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
     <parameter category="Developer" default="0" name="CBRK_VELPOSERR" type="INT32">
       <short_desc>Circuit breaker for position error check</short_desc>
@@ -523,7 +523,7 @@ Set to 2 to use heading from motion capture</short_desc>
       <min>0</min>
       <max>201607</max>
       <reboot_required>true</reboot_required>
-      <scope>modules/systemlib</scope>
+      <scope>lib/circuit_breaker</scope>
     </parameter>
   </group>
   <group name="Commander">
@@ -1593,14 +1593,15 @@ This parameter is used when the magnetometer fusion method is set automatically 
     </parameter>
     <parameter default="0" name="EKF2_MAG_TYPE" type="INT32">
       <short_desc>Type of magnetometer fusion</short_desc>
-      <long_desc>Integer controlling the type of magnetometer fusion used - magnetic heading or 3-axis magnetometer. If set to automatic: heading fusion on-ground and 3-axis fusion in-flight with fallback to heading fusion if there is insufficient motion to make yaw or mag biases observable.</long_desc>
+      <long_desc>Integer controlling the type of magnetometer fusion used - magnetic heading or 3-component vector. The fuson of magnetomer data as a three component vector enables vehicle body fixed hard iron errors to be learned, but requires a stable earth field. If set to 'Automatic' magnetic heading fusion is used when on-ground and 3-axis magnetic field fusion in-flight with fallback to magnetic heading fusion if there is insufficient motion to make yaw or magnetic field states observable. If set to 'Magnetic heading' magnetic heading fusion is used at all times If set to '3-axis' 3-axis field fusion is used at all times. If set to 'VTOL custom' the behaviour is the same as 'Automatic', but if fusing airspeed, magnetometer fusion is only allowed to modify the magnetic field states. This can be used by VTOL platforms with large magnetic field disturbances to prevent incorrect bias states being learned during forward flight operation which can adversely affect estimation accuracy after transition to hovering flight. If set to 'MC custom' the behaviour is the same as 'Automatic, but if there are no earth frame position or velocity observations being used, the magnetometer will not be used. This enables vehicles to operate with no GPS in environments where the magnetic field cannot be used to provide a heading reference.</long_desc>
       <reboot_required>true</reboot_required>
       <scope>modules/ekf2</scope>
       <values>
         <value code="0">Automatic</value>
         <value code="1">Magnetic heading</value>
-        <value code="2">3-axis fusion</value>
-        <value code="3">None</value>
+        <value code="2">3-axis</value>
+        <value code="3">VTOL customn</value>
+        <value code="4">MC custom</value>
       </values>
     </parameter>
     <parameter default="0.25" name="EKF2_MAG_YAWLIM" type="FLOAT">
@@ -1700,14 +1701,6 @@ Assumes measurement is timestamped at trailing edge of integration period</short
       <max>255</max>
       <scope>modules/ekf2</scope>
     </parameter>
-    <parameter default="2.5" name="EKF2_OF_RMAX" type="FLOAT">
-      <short_desc>Optical Flow data will not fused if the magnitude of the flow rate &gt; EKF2_OF_RMAX.
-Control loops will be instructed to limit ground speed such that the flow rate produced by movement over ground is less than 50% of EKF2_OF_RMAX</short_desc>
-      <min>1.0</min>
-      <unit>rad/s</unit>
-      <decimal>2</decimal>
-      <scope>modules/ekf2</scope>
-    </parameter>
     <parameter default="0.0" name="EKF2_PCOEF_XN" type="FLOAT">
       <short_desc>Static pressure position error coefficient for the negative X axis.
 This is the ratio of static pressure error to dynamic pressure generated by a negative wind relative velocity along the X body axis.
@@ -1798,7 +1791,7 @@ This is the ratio of static pressure error to dynamic pressure generated by a wi
     </parameter>
     <parameter default="0" name="EKF2_RNG_AID" type="INT32">
       <short_desc>Range sensor aid</short_desc>
-      <long_desc>If this parameter is enabled then the estimator will make use of the range finder measurements to estimate it's height even if range sensor is not the primary height source. It will only do so if conditions for range measurement fusion are met.</long_desc>
+      <long_desc>If this parameter is enabled then the estimator will make use of the range finder measurements to estimate it's height even if range sensor is not the primary height source. It will only do so if conditions for range measurement fusion are met. This enables the range finder to be used during low speed and low altitude operation. Speed and height criteria are controlled by EKF2_RNG_A_VMAX and EKF2_RNG_A_HMAX. It should not be used for terrain following. It is intended to be used where a vertical takeoff and landing is performed, and horizontal flight does not occur until above EKF2_RNG_A_HMAX. If vehicle motion causes repeated switvhing between the rimary height sensor and range finder, an offset in the local position origin can accumulate. For terrain following, it is recommended to use the MPC_ALT_MODE parameter instead.</long_desc>
       <scope>modules/ekf2</scope>
       <values>
         <value code="0">Range aid disabled</value>
@@ -3260,15 +3253,6 @@ Value 0 turns the functionality off</short_desc>
       <decimal>1</decimal>
       <scope>modules/land_detector</scope>
     </parameter>
-    <parameter default="8.0" name="LNDFW_VELI_MAX" type="FLOAT">
-      <short_desc>Fixedwing max short-term velocity</short_desc>
-      <long_desc>Maximum velocity integral in flight direction allowed in the landed state (m/s)</long_desc>
-      <min>2</min>
-      <max>10</max>
-      <unit>m/s</unit>
-      <decimal>1</decimal>
-      <scope>modules/land_detector</scope>
-    </parameter>
     <parameter default="5.0" name="LNDFW_VEL_XY_MAX" type="FLOAT">
       <short_desc>Fixedwing max horizontal velocity</short_desc>
       <long_desc>Maximum horizontal velocity allowed in the landed state (m/s)</long_desc>
@@ -3278,12 +3262,21 @@ Value 0 turns the functionality off</short_desc>
       <decimal>1</decimal>
       <scope>modules/land_detector</scope>
     </parameter>
-    <parameter default="10.0" name="LNDFW_VEL_Z_MAX" type="FLOAT">
+    <parameter default="3.0" name="LNDFW_VEL_Z_MAX" type="FLOAT">
       <short_desc>Fixedwing max climb rate</short_desc>
       <long_desc>Maximum vertical velocity allowed in the landed state (m/s up and down)</long_desc>
-      <min>5</min>
+      <min>0.1</min>
       <max>20</max>
       <unit>m/s</unit>
+      <decimal>1</decimal>
+      <scope>modules/land_detector</scope>
+    </parameter>
+    <parameter default="8.0" name="LNDFW_XYACC_MAX" type="FLOAT">
+      <short_desc>Fixedwing max horizontal acceleration</short_desc>
+      <long_desc>Maximum horizontal (x,y body axes) acceleration allowed in the landed state (m/s^2)</long_desc>
+      <min>2</min>
+      <max>15</max>
+      <unit>m/s^2</unit>
       <decimal>1</decimal>
       <scope>modules/land_detector</scope>
     </parameter>
@@ -4635,9 +4628,10 @@ default 1.5 turns per second</short_desc>
       <increment>1</increment>
       <scope>modules/mc_pos_control</scope>
     </parameter>
-    <parameter default="0.5" name="MPC_ACC_HOR_FLOW" type="FLOAT">
-      <short_desc>Horizontal acceleration in manual modes when optical flow ground speed limit is removed.
-If full stick is being applied and the EKF starts using GPS whilst using optical flow,
+    <parameter default="0.5" name="MPC_ACC_HOR_ESTM" type="FLOAT">
+      <short_desc>Horizontal acceleration in manual modes when te estimator speed limit is removed.
+If full stick is being applied and the estimator stops demanding a speed limit,
+which it had been before (e.g if GPS is gained while flying on optical flow/vision only),
 the vehicle will accelerate at this rate until the normal position control speed is achieved</short_desc>
       <min>0.2</min>
       <max>2.0</max>
@@ -4665,7 +4659,8 @@ the vehicle will accelerate at this rate until the normal position control speed
       <scope>modules/mc_pos_control</scope>
     </parameter>
     <parameter default="0" name="MPC_ALT_MODE" type="INT32">
-      <short_desc>Altitude control mode, note mode 1 only tested with LPE</short_desc>
+      <short_desc>Altitude control mode</short_desc>
+      <long_desc>Set to 1 to control height above ground instead of height above origin. Note: If optical flow is being used as the only source of navigation then the height above ground will be selected automatically and maximum height will be limited to the value set by MPC_MAX_FLOW_HGT. Note: The height controller will revert to using height above origin if the distance to ground estimate becomes invalid as indicated by the local_position.distance_bottom_valid message being false.</long_desc>
       <min>0</min>
       <max>1</max>
       <scope>modules/mc_pos_control</scope>
@@ -7045,6 +7040,7 @@ the setpoint will be capped to MPC_XY_VEL_MAX</short_desc>
     </parameter>
     <parameter default="0" name="RC_MAP_ARM_SW" type="INT32">
       <short_desc>Arm switch channel</short_desc>
+      <long_desc>Use it to arm/disarm via switch instead of default throttle stick. If this is assigned, arming and disarming via stick is disabled.</long_desc>
       <min>0</min>
       <max>18</max>
       <scope>modules/sensors</scope>
@@ -8243,9 +8239,34 @@ This is used for gathering replay logs for the ekf2 module</short_desc>
       <long_desc>The offset (zero-reading) in Pascal</long_desc>
       <scope>modules/sensors</scope>
     </parameter>
-    <parameter default="0.7" name="SENS_FLOW_MINRNG" type="FLOAT">
-      <short_desc>Optical Flow minimum focus distance</short_desc>
-      <long_desc>This parameter defines the minimum distance from ground required for the optical flow sensor to operate reliably. The sensor may be usable below this height, but accuracy will progressively reduce to loss of focus. *</long_desc>
+    <parameter default="3.0" name="SENS_FLOW_MAXHGT" type="FLOAT">
+      <short_desc>Maximum height above ground when reliant on optical flow</short_desc>
+      <long_desc>This parameter defines the maximum distance from ground at which the optical flow sensor operates reliably. The height setpoint will be limited to be no greater than this value when the navigation system is completely reliant on optical flow data and the height above ground estimate is valid. The sensor may be usable above this height, but accuracy will progressively degrade.</long_desc>
+      <min>1.0</min>
+      <max>25.0</max>
+      <unit>m</unit>
+      <decimal>1</decimal>
+      <increment>0.1</increment>
+      <scope>modules/sensors</scope>
+    </parameter>
+    <parameter default="2.5" name="SENS_FLOW_MAXR" type="FLOAT">
+      <short_desc>Magnitude of maximum angular flow rate reliably measurable by the optical flow sensor.
+Optical flow data will not fused by the estimators if the magnitude of the flow rate exceeds this value and
+control loops will be instructed to limit ground speed such that the flow rate produced by movement over ground
+is less than 50% of this value</short_desc>
+      <min>1.0</min>
+      <unit>rad/s</unit>
+      <decimal>2</decimal>
+      <scope>modules/sensors</scope>
+    </parameter>
+    <parameter default="0.7" name="SENS_FLOW_MINHGT" type="FLOAT">
+      <short_desc>Minimum height above ground when reliant on optical flow</short_desc>
+      <long_desc>This parameter defines the minimum distance from ground at which the optical flow sensor operates reliably. The sensor may be usable below this height, but accuracy will progressively reduce to loss of focus.</long_desc>
+      <min>0.0</min>
+      <max>1.0</max>
+      <unit>m</unit>
+      <decimal>1</decimal>
+      <increment>0.1</increment>
       <scope>modules/sensors</scope>
     </parameter>
   </group>
@@ -8584,7 +8605,7 @@ This is used for gathering replay logs for the ekf2 module</short_desc>
       <short_desc>TELEM2 as companion computer link</short_desc>
       <long_desc>CHANGING THIS VALUE REQUIRES A RESTART. Configures the baud rate of the TELEM2 connector as companion computer interface.</long_desc>
       <min>0</min>
-      <max>1921600</max>
+      <max>6460800</max>
       <reboot_required>true</reboot_required>
       <scope>modules/systemlib</scope>
       <values>

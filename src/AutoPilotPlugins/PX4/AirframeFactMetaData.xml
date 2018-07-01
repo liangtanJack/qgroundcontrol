@@ -387,6 +387,22 @@
       <type>Simulation</type>
     </airframe>
   </airframe_group>
+  <airframe_group image="AirframeUnknown" name="Tilt-Quad">
+    <airframe id="4100" maintainer="Ricardo Marques &lt;marques.ricardo17@gmail.com&gt;" name="Tilt-Quadrotor">
+      <class>Copter</class>
+      <maintainer>Ricardo Marques &lt;marques.ricardo17@gmail.com&gt;</maintainer>
+      <type>Tilt-Quad</type>
+      <url>http://www.alivaero.com/the-project.html</url>
+      <output name="MAIN1">motor 1</output>
+      <output name="MAIN2">motor 2</output>
+      <output name="MAIN3">motor 3</output>
+      <output name="MAIN4">motor 4</output>
+      <output name="AUX1">Outer servo motor for rotor 2 arm</output>
+      <output name="AUX2">Outer servo motor for rotor 4 arm</output>
+      <output name="AUX3">Inner servo motor for rotor 2 arm</output>
+      <output name="AUX4">Inner servo motor for rotor 4 arm</output>
+    </airframe>
+  </airframe_group>
   <airframe_group image="YPlus" name="Tricopter Y+">
     <airframe id="14001" maintainer="Trent Lukaczyk &lt;aerialhedgehog@gmail.com&gt;" name="Generic Tricopter Y+ Geometry">
       <class>Copter</class>
